@@ -92,7 +92,30 @@ def handle_client(conn, addr):
     #        print(f"[PID {os.getpid()}] Клиент {addr} отключён")
 
     # --- Ваш код здесь ---
-    pass
+    # 1. Получаем PID текущего дочернего процесса и выводим лог подключения
+    pid = os.getpid()
+    print(f"[PID {pid}] Клиент {addr} подключён")
+
+    try:
+        # 2. Читаем данные от клиента (до 1024 байт)
+        data = conn.recv(1024)
+        
+        if data:
+            # 3. Декодируем и выводим полученное сообщение
+            message = data.decode().strip()
+            print(f"[PID {pid}] Получено: '{message}'")
+
+            # 4. Отправляем данные обратно (эхо)
+            conn.sendall(data)
+        else:
+            print(f"[PID {pid}] Пустые данные от клиента.")
+
+    except Exception as e:
+        print(f"[PID {pid}] Ошибка при обработке: {e}")
+    finally:
+        # 5. Закрываем соединение в дочернем процессе
+        conn.close()
+        print(f"[PID {pid}] Клиент {addr} отключён")
     # --- Конец вашего кода ---
 
 

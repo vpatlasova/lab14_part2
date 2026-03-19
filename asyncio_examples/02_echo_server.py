@@ -82,7 +82,30 @@ async def handle_echo(reader, writer):
     #        await writer.wait_closed()
 
     # --- Ваш код здесь ---
-    pass
+    # 1. Прочитайте данные от клиента (до 1024 байт)
+    data = await reader.read(1024)
+    
+    # Если данных нет (клиент отключился), просто закрываем соединение
+    if not data:
+        writer.close()
+        return
+
+    # 2. Декодируйте байты в строку для вывода в консоль
+    message = data.decode().strip()
+    
+    # 3. Получите адрес клиента и выведите лог
+    addr = writer.get_extra_info('peername')
+    print(f"Подключение от {addr}, сообщение: '{message}'")
+    
+    # 4. Отправьте данные обратно клиенту (эхо)
+    writer.write(data)
+    # Ждем завершения физической отправки данных из буфера
+    await writer.drain()
+    
+    # 5. Закройте соединение корректно
+    print(f"Закрытие соединения с {addr}")
+    writer.close()
+    await writer.wait_closed()
     # --- Конец вашего кода ---
 
 

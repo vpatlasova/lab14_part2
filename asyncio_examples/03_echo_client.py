@@ -74,7 +74,22 @@ async def tcp_echo_client(message, host, port):
     #        await writer.wait_closed()
 
     # --- Ваш код здесь ---
-    pass
+    # 1. Закодируйте и отправьте
+    writer.write(message.encode())
+    await writer.drain()
+
+    # 2. Прочитайте ответ от сервера
+    data = await reader.read(1024)
+    
+    # 3. Выведите результат декодированным
+    if data:
+        print(f"Отправлено: '{message}' -> Получено: '{data.decode()}'")
+    else:
+        print(f"Сервер закрыл соединение для сообщения: '{message}'")
+
+    # 4. Закройте соединение
+    writer.close()
+    await writer.wait_closed()
     # --- Конец вашего кода ---
 
 
@@ -97,7 +112,12 @@ async def main_multiple():
     #   )
 
     # --- Ваш код здесь ---
-    pass
+    messages = [f"Сообщение {i}" for i in range(1, 6)]
+    
+    # Создаем список корутин и запускаем их одновременно через gather
+    await asyncio.gather(
+        *(tcp_echo_client(msg, HOST, PORT) for msg in messages)
+    )
     # --- Конец вашего кода ---
 
 
